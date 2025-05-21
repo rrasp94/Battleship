@@ -1,4 +1,4 @@
-﻿namespace Model.Model;
+﻿namespace Model;
 
 
 public class Grid

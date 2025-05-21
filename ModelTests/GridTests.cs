@@ -1,4 +1,4 @@
-﻿using Model.Model;
+﻿using Model;
 
 namespace ModelTests;
 
