@@ -1,9 +1,9 @@
 ﻿namespace Model;
 
 
-public class Grid
+public class FleetGrid
 {
-    public Grid(int rows, int columns)
+    public FleetGrid(int rows, int columns)
     {
         Rows = rows;
         Columns = columns;
