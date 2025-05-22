@@ -23,11 +23,20 @@ public class Ship
 
     public HitResult Hit(int row, int column)
     {
-        if (Contains(row, column) == false)
+        var square = Squares.FirstOrDefault(sq => sq.Row == row && sq.Column == column);
+        if (square == null)
         {
             return HitResult.Missed;
         }
 
-        throw new NotImplementedException();
+        square.Hit();
+
+        if (Squares.All(sq => sq.IsHit))
+        {
+            return HitResult.Sunken;
+        }
+
+        return HitResult.Hit;
+
     }
 }
