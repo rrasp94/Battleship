@@ -37,6 +37,5 @@ public class Ship
         }
 
         return HitResult.Hit;
-
     }
 }

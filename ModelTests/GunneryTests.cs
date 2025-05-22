@@ -15,6 +15,7 @@ namespace ModelTests
         public void ShootingTacticsRemainsRandomIfHitResultIsMissed()
         {
             var gunnery = new Gunnery(10, 10, new List<int> { 1, 2, 3 });
+            gunnery.Next();
             gunnery.ProcessHitResult(HitResult.Missed);
             Assert.AreEqual(ShootingTactics.Random, gunnery.ShootingTactics);
         }
@@ -22,6 +23,7 @@ namespace ModelTests
         public void ShootingTacticsChangesToSurroundingAfterFirstSquareIsHit()
         {
             var gunnery = new Gunnery(10, 10, new List<int> { 1, 2, 3 });
+            gunnery.Next();
             gunnery.ProcessHitResult(HitResult.Hit);
             Assert.AreEqual(ShootingTactics.Surrounding, gunnery.ShootingTactics);
         }
@@ -29,8 +31,10 @@ namespace ModelTests
         public void ShootingTacticsRemainsSurroundingIfNextSquareIsMissed()
         {
             var gunnery = new Gunnery(10, 10, new List<int> { 1, 2, 3 });
+            gunnery.Next();
             gunnery.ProcessHitResult(HitResult.Hit);
             Assert.AreEqual(ShootingTactics.Surrounding, gunnery.ShootingTactics);
+            //gunnery.Next();
             gunnery.ProcessHitResult(HitResult.Missed);
             Assert.AreEqual(ShootingTactics.Surrounding, gunnery.ShootingTactics);
         }
@@ -38,6 +42,7 @@ namespace ModelTests
         public void ShootingTacticsChangesFromSurroundingToInlineAfterSecondSquareIsHit()
         {
             var gunnery = new Gunnery(10, 10, new List<int> { 1, 2, 3 });
+            gunnery.Next();
             gunnery.ProcessHitResult(HitResult.Hit);
             Assert.AreEqual(ShootingTactics.Surrounding, gunnery.ShootingTactics);
             gunnery.ProcessHitResult(HitResult.Hit);
@@ -47,6 +52,7 @@ namespace ModelTests
         public void ShootingTacticsRemainsInlineAfterThirdSquareIsHit()
         {
             var gunnery = new Gunnery(10, 10, new List<int> { 1, 2, 3 });
+            gunnery.Next();
             gunnery.ProcessHitResult(HitResult.Hit);
             Assert.AreEqual(ShootingTactics.Surrounding, gunnery.ShootingTactics);
             gunnery.ProcessHitResult(HitResult.Hit);
@@ -58,6 +64,7 @@ namespace ModelTests
         public void ShootingTacticsRemainsInlineAfterThirdSquareIsMissed()
         {
             var gunnery = new Gunnery(10, 10, new List<int> { 1, 2, 3 });
+            gunnery.Next();
             gunnery.ProcessHitResult(HitResult.Hit);
             Assert.AreEqual(ShootingTactics.Surrounding, gunnery.ShootingTactics);
             gunnery.ProcessHitResult(HitResult.Hit);
@@ -69,6 +76,7 @@ namespace ModelTests
         public void ShootingTacticsChangesToRandomAfterShipIsSunken()
         {
             var gunnery = new Gunnery(10, 10, new List<int> { 1, 2, 3 });
+            gunnery.Next();
             gunnery.ProcessHitResult(HitResult.Hit);
             Assert.AreEqual(ShootingTactics.Surrounding, gunnery.ShootingTactics);
             gunnery.ProcessHitResult(HitResult.Sunken);
