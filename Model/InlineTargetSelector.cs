@@ -2,7 +2,7 @@
 
 public class InlineTargetSelector : ITargetSelector
 {
-    public SquareCoordinate Next()
+    public Square Next()
     {
         throw new NotImplementedException();
     }

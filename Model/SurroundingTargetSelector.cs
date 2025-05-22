@@ -2,7 +2,7 @@
 
 public class SurroundingTargetSelector : ITargetSelector
 {
-    public SquareCoordinate Next()
+    public Square Next()
     {
         throw new NotImplementedException();
     }
