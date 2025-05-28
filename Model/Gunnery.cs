@@ -79,7 +79,7 @@ public class Gunnery
         var toEliminate = eliminator.ToEliminate(shipSquares, recordGrid.Rows, recordGrid.Columns);
         foreach (var square in toEliminate)
         {
-            recordGrid.GetSquare(square.Row, square.Column).ChangeState(SquareState.Eliminated);
+            recordGrid.ChangeSquareState(square.Row, square.Column, SquareState.Eliminated);
         }
         shipSquares.Clear();
     }
@@ -93,7 +93,7 @@ public class Gunnery
     private void ChangeTacticsToSurrounding()
     {
         ShootingTactics = ShootingTactics.Surrounding;
-        targetSelector = new SurroundingTargetSelector();
+        targetSelector = new SurroundingTargetSelector(recordGrid, target, shipLengths[0]);
     }
 
     private void ChangeTacticsToInline()
