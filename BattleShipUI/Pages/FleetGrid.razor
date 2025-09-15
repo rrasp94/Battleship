@@ -1,0 +1,48 @@
+﻿@using Model
+<div class="card shadow-sm">
+    <div class="card-header custom-bg-fleets text-white text-center">
+        <h3>@Title</h3>
+    </div>
+    <div class="card-body">
+        <div class="grid-container">
+            @for (int row = 0; row < GridRows; row++)
+            {
+                <div class="grid-row justify-content-center">
+                    @for (int col = 0; col < GridColumns; col++)
+                    {
+                        var r = row;
+                        var c = col;
+
+                        if (IsOwnFleet)
+                        {
+                            var isShip = GameService.IsPlayer1Turn ? GameService.IsPlayer1ShipAt(r, c) : GameService.IsPlayer2ShipAt(r, c);
+                            var isHit = GameService.IsPlayer1Turn ? GameService.HasPlayer2Hit(r, c) : GameService.HasPlayer1Hit(r, c);
+                            var hitState = isHit ? (GameService.IsPlayer1Turn ? GameService.GetPlayer2HitState(r, c) : GameService.GetPlayer1HitState(r, c)) : SquareState.Intact;
+
+                            <div class="grid-cell animate @(CellClassSelector(isShip, hitState))"></div>
+                        }
+                        else
+                        {
+                            var isHit = GameService.IsPlayer1Turn ? GameService.HasPlayer1Hit(r, c) : GameService.HasPlayer2Hit(r, c);
+                            var hitState = isHit ? (GameService.IsPlayer1Turn ? GameService.GetPlayer1HitState(r, c) : GameService.GetPlayer2HitState(r, c)) : SquareState.Intact;
+
+                            <div class="grid-cell animate @(CellClassSelector(false, hitState))"
+                                 @onclick="() => OnCellClick?.Invoke(r, c)">
+                            </div>
+                        }
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string Title { get; set; }
+    [Parameter] public int GridRows { get; set; }
+    [Parameter] public int GridColumns { get; set; }
+    [Parameter] public bool IsOwnFleet { get; set; }
+    [Parameter] public BattleShipUI.Services.GameService GameService { get; set; }
+    [Parameter] public Func<bool, SquareState, string> CellClassSelector { get; set; }
+    [Parameter] public Action<int, int>? OnCellClick { get; set; }
+}

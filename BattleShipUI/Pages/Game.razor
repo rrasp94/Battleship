@@ -1,0 +1,162 @@
+﻿@page "/game"
+@inject NavigationManager NavigationManager
+@inject BattleShipUI.Services.GameService GameService
+@using Model
+@implements IDisposable
+
+<div class="container mt-3">
+    @if (showNextPlayerScreen)
+    {
+        <div class="ready-screen">
+            <div class="ready-box">
+                <h2>Ready for @nextPlayerName</h2>
+                <p>Pass the device to @nextPlayerName</p>
+                <p>Game duration: @gameDuration.ToString(@"mm\:ss")</p>
+                <button class="ready-btn" @onclick="ContinueToNextPlayer">
+                    I'm Ready
+                </button>
+            </div>
+        </div>
+    }
+    else
+    {
+        <GameStatus Player1Name="Player1Name"
+                    Player2Name="Player2Name"
+                    GameService="GameService"
+                    GameDuration="gameDuration" />
+
+        <!-- Horizontalni layout gridova -->
+        <div class="game-grids">
+            <div class="grid-wrapper">
+                <FleetGrid Title="@($"{(GameService.IsPlayer1Turn ? Player1Name : Player2Name)}'s Fleet")"
+                           GridRows="GameService.GridRows"
+                           GridColumns="GameService.GridColumns"
+                           CellClassSelector="GetPlayerCellClass"
+                           IsOwnFleet="true"
+                           GameService="GameService" />
+            </div>
+
+            <div class="grid-wrapper">
+                <FleetGrid Title="@($"{(GameService.IsPlayer1Turn ? Player2Name : Player1Name)}'s Fleet")"
+                           GridRows="GameService.GridRows"
+                           GridColumns="GameService.GridColumns"
+                           CellClassSelector="GetEnemyCellClass"
+                           IsOwnFleet="false"
+                           OnCellClick="ShootAtEnemy"
+                           GameService="GameService" />
+            </div>
+        </div>
+
+        <div class="game-controls-wrapper">
+            <GameControls OnBack="ReturnToIndex" OnRestart="RestartGame" />
+        </div>
+    }
+</div>
+
+
+@code {
+    [Parameter][SupplyParameterFromQuery(Name = "player1")] public string Player1Name { get; set; } = "Player 1";
+    [Parameter][SupplyParameterFromQuery(Name = "player2")] public string Player2Name { get; set; } = "Player 2";
+    [Parameter][SupplyParameterFromQuery(Name = "gridSize")] public int GridSize { get; set; } = 10;
+    [Parameter][SupplyParameterFromQuery(Name = "ships")] public string ShipsParam { get; set; } = "5,4,4,3,3,3,2,2,2,2";
+
+    private bool showNextPlayerScreen = false;
+    private string nextPlayerName = string.Empty;
+    private TimeSpan gameDuration = TimeSpan.Zero;
+    private DateTime gameStartTime;
+    private System.Threading.Timer gameTimer;
+    private bool isGameTimerRunning = false;
+
+    protected override void OnInitialized()
+    {
+        int[] shipLengths = ShipsParam.Split(',').Select(int.Parse).ToArray();
+        GameService.InitializeGame(GridSize, shipLengths);
+        StartGameTimer();
+    }
+
+    private void StartGameTimer()
+    {
+        gameStartTime = DateTime.Now;
+        isGameTimerRunning = true;
+        gameTimer = new System.Threading.Timer(_ =>
+        {
+            if (isGameTimerRunning)
+            {
+                gameDuration = DateTime.Now - gameStartTime;
+                InvokeAsync(StateHasChanged);
+            }
+        }, null, 0, 1000);
+    }
+
+    private void StopGameTimer()
+    {
+        isGameTimerRunning = false;
+        gameTimer?.Dispose();
+    }
+
+    private void ShootAtEnemy(int row, int col)
+    {
+        if (GameService.IsGameOver || showNextPlayerScreen) return;
+
+        bool isPlayer1Turn = GameService.IsPlayer1Turn;
+
+        if ((isPlayer1Turn && GameService.HasPlayer1Hit(row, col)) ||
+            (!isPlayer1Turn && GameService.HasPlayer2Hit(row, col)))
+            return;
+
+        var result = GameService.PlayerShoot(row, col, isPlayer1Turn);
+
+        if (GameService.IsGameOver)
+            StopGameTimer();
+        else if (result == HitResult.Missed || result == HitResult.Sunken)
+            ShowNextPlayerScreen();
+
+        StateHasChanged();
+    }
+
+    private void ShowNextPlayerScreen()
+    {
+        nextPlayerName = GameService.IsPlayer1Turn ? Player1Name : Player2Name;
+        showNextPlayerScreen = true;
+    }
+
+    private void ContinueToNextPlayer() => showNextPlayerScreen = false;
+
+    private void ReturnToIndex()
+    {
+        StopGameTimer();
+        NavigationManager.NavigateTo("/");
+    }
+
+    private void RestartGame()
+    {
+        StopGameTimer();
+        int[] shipLengths = ShipsParam.Split(',').Select(int.Parse).ToArray();
+        GameService.InitializeGame(GridSize, shipLengths);
+        gameDuration = TimeSpan.Zero;
+        showNextPlayerScreen = false;
+        StartGameTimer();
+    }
+
+    private string GetPlayerCellClass(bool isShip, SquareState hitState) => hitState switch
+    {
+        SquareState.Hit => "hit",
+        SquareState.Sunken => "hit",
+        SquareState.Missed => "missed",
+        _ => isShip ? "ship" : "intact"
+    };
+
+    private string GetEnemyCellClass(bool isShip, SquareState hitState) => hitState switch
+    {
+        SquareState.Hit => "hit",
+        SquareState.Sunken => "hit",
+        SquareState.Missed => "missed",
+        _ => "intact enemy-cell"
+    };
+
+    public void Dispose()
+    {
+        StopGameTimer();
+        gameTimer?.Dispose();
+    }
+}

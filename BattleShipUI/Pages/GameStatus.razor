@@ -1,0 +1,32 @@
+﻿@using Model
+<div class="row justify-content-center">
+    <div class="col-12 mb-3">
+        <div class="game-status alert fade-in @(GameService.IsGameOver ? "custom-bg-info" : "custom-bg-light") text-center">
+            @if (GameService.IsGameOver)
+            {
+                <h3 class="mb-0">
+                    Game Over - @(GameService.IsPlayer1Winner() ? $"{Player1Name} Won!" : GameService.IsPlayer2Winner() ? $"{Player2Name} Won!" : "Draw!")
+                </h3>
+                <h4 class="mb-0">Game duration: @GameDuration.ToString(@"mm\:ss")</h4>
+            }
+            else
+            {
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        @(GameService.IsPlayer1Turn ? $"{Player1Name}'s turn" : $"{Player2Name}'s turn")
+                    </h4>
+                    <h4 class="mb-0">
+                        Time: @GameDuration.ToString(@"mm\:ss")
+                    </h4>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string Player1Name { get; set; } = "";
+    [Parameter] public string Player2Name { get; set; } = "";
+    [Parameter] public BattleShipUI.Services.GameService GameService { get; set; }
+    [Parameter] public TimeSpan GameDuration { get; set; }
+}

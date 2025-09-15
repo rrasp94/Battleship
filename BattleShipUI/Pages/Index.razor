@@ -1,0 +1,54 @@
+﻿@page "/"
+@inject NavigationManager NavigationManager
+@using System.Collections.Generic
+
+<div class="start-screen">
+    <div class="start-box">
+        <h2>Welcome to Battleship!</h2>
+
+        <input @bind="player1Name" class="form-control" placeholder="Enter Player 1 name" />
+        <input @bind="player2Name" class="form-control" placeholder="Enter Player 2 name" />
+
+        <h5>Select Grid Size</h5>
+        @foreach (var size in new int[] { 10, 11, 12, 13, 14 })
+        {
+            <button type="button"
+                    class="grid-size-btn @(gridSize == size ? "selected" : "")"
+                    @onclick="() => { gridSize = size; isSizeSelected = true; }">
+                @size x @size
+            </button>
+        }
+
+        @if (string.IsNullOrWhiteSpace(player1Name) || string.IsNullOrWhiteSpace(player2Name))
+        {
+            <div class="alert alert-warning">Please enter both players' names</div>
+        }
+        @if (!isSizeSelected)
+        {
+            <div class="alert alert-warning">Please select a grid size</div>
+        }
+
+        <button class="start-btn"
+                disabled="@(!isSizeSelected || string.IsNullOrEmpty(player1Name) || string.IsNullOrEmpty(player2Name))"
+                @onclick="StartGame">
+            Start Game
+        </button>
+    </div>
+</div>
+
+@code {
+    private int? gridSize = null;
+    private bool isSizeSelected = false;
+    private string player1Name = string.Empty;
+    private string player2Name = string.Empty;
+
+    private List<int> shipLengths = new() { 5, 4, 4, 3, 3, 3, 2, 2, 2, 2 };
+
+    private void StartGame()
+    {
+        if (!gridSize.HasValue || string.IsNullOrEmpty(player1Name) || string.IsNullOrEmpty(player2Name)) return;
+
+        var shipSizes = string.Join(",", shipLengths);
+        NavigationManager.NavigateTo($"/game?gridSize={gridSize.Value}&ships={shipSizes}&player1={Uri.EscapeDataString(player1Name)}&player2={Uri.EscapeDataString(player2Name)}");
+    }
+}
